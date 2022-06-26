@@ -1,0 +1,115 @@
+---
+title: "Homework7Part1Kelly Craig"
+author: "Kelly Craig"
+date: "June 5, 2019"
+output:
+  html_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, eval = TRUE, message = FALSE)
+library(tidyverse)
+library(knitr)
+library(DT)
+library(ggplot2)
+library(summarytools)
+```
+
+```{r echo = FALSE, out.width = "600px"}
+include_graphics("C:/Users/Kelly/Documents/HorseshoeCrab.jpg")
+```  
+
+# Horseshoe Crabs
+
+##Introduction
+"Horseshoe crabs arrive on the beach in pairs and spawn . during . high tides. Unattached males also come to the beach, crowd around the nesting couples and compete with attached males for fertilizations. Satellite males form large groups around some couples while ignoring others, resulting in a nonrandom distribution that cannot be explained by local environmental conditions or habitat selection." (Brockmann, H. J. (1996) Satellite Male Groups in Horseshoe Crabs, Limulus polyphemus, Ethology, 102, 1-21. )
+
+###Data
+We have a data set about 173 mating female crabs. Data collected included whether or not a male satellite was present (and how many if present) and the color, spine condition, weight, and carapace width of the femal crab.
+
+``````{r echo=FALSE, include =FALSE, results = 'hide'}
+Crabs <- read_delim(file = "C:/Users/Kelly/Documents/crabs.txt", delim = "  ")
+Crabs <- tbl_df(Crabs)
+Crabs
+Color <- as.factor(Crabs$color)
+Spine <- as.factor(Crabs$spine)
+Satell <- as.factor(Crabs$satell)
+```
+
+```{r echo=FALSE, include =FALSE, results = 'hide'}
+levels(Color) <- c(levels(Color), "light",  "medium","dark","darker")
+Color[Color == "2"]<-"light"
+Color[Color == "3"]<-"medium"
+Color[Color == "4"]<-"dark"
+Color[Color == "5"]<-"darker"
+
+
+levels(Spine) <- c(levels(Spine), "Both Good",  "One Worn/Broken","Both Worn/Broken")
+Spine[Spine == " 1"]<-"Both Good"
+Spine[Spine == " 2"]<-"One Worn/Broken"
+Spine[Spine == " 3"]<-"Both Worn/Broken"
+Spine
+
+levels(Satell) <- c(levels(Satell), "At least 1 Satellite", "No Satellite")
+Satell[Satell != " 0"] <-"At least 1 Satellite"
+Satell[Satell == " 0"]<-"No Satellite"
+
+#Satell <- ifelse(Crabs$satell == '0', 'No Satellite', "At least 1 Satellite")
+
+New <- cbind(Color, Spine, Crabs, Satell) %>% select(Color, Spine, width, satell, weight, Satell)
+New
+
+New1 <- New %>% rename("Spine Condition" = Spine, "carapace Width"= width, "Satellites Present" = satell, "Weight" = weight, "Satellite Indicator" = Satell)
+```
+
+```{r echo=FALSE}
+datatable(New1)
+```
+
+#Numeric Summaries
+We'll consider three categorical variables from the data set: female color, spine condition, and whether or not a satellite was present.
+
+###Full table
+```{r echo=FALSE, include =FALSE, results = 'hide'}
+Table1 <- table(New$Color, New$Spine)
+Table1 <- Table1[5:8,4:6]
+```
+
+```{r echo=FALSE}
+knitr::kable(Table1, caption= "Color and Spine condition information")
+```
+
+###Table by Satellite Indicator
+```{r echo=FALSE, include =FALSE, results = 'hide'}
+Table2 <- filter(New, Satell == "No Satellite") 
+Table2 <- table(Table2$Color, Table2$Spine)
+Table2 <- Table2[5:8,4:6]
+
+Table3 <- filter(New, Satell == "At least 1 Satellite") 
+Table3 <- table(Table3$Color, Table3$Spine)
+Table3 <- Table3[5:8,4:6]
+```
+
+```{r echo=FALSE}
+knitr::kable(Table2, caption= "For female crabs with no satellite:")
+knitr::kable(Table3, caption= "For female crabs with at least one satellite:")
+```
+
+#Visuals
+##One Variable
+```{r echo=FALSE}
+#Trying to figure out what to plot for this..
+#Colorplot <- tbl_df(Crabs$color)
+#Colorplot <- table(Crabs$color)
+#Colorplot <- data.frame(Colorplot)
+#Colorplot <- as.data.frame(Crabs$color)
+#g <- ggplot(data = Colorplot, aes(x = color))
+#g + geom_bar()
+#Colorplot <- count(Crabs$color)
+#tbl_df(Colorplot)
+#Crabs %>% group_by(teamID,yearID)
+```
+
+##Two Variable
+##Three Variable

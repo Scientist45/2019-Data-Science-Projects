@@ -1,0 +1,67 @@
+---
+title: "Homework 11"
+author: "Kelly Craig"
+date: "June 26, 2019"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(caret)
+```
+
+```{r include=FALSE}
+#read data/clean it
+titanicData <- read_csv("C:/users/Kelly/Documents/titanic.csv")
+#Take NA data out of survived, fare, and age columns. Make the survived column a factor.
+titanicData <- filter(titanicData, !is.na(survived) & !is.na(fare) & !is.na(age))
+titanicData$survived <- as.factor(titanicData$survived)
+set.seed(1)
+#Split the dataset into the training data and the testing data.
+train <- sample(1:nrow(titanicData), size = nrow(titanicData)*0.8)
+test <- dplyr::setdiff(1:nrow(titanicData), train)
+titanicDataTrain <- titanicData[train, ]
+titanicDataTest <- titanicData[test, ]
+```
+
+```{r echo=TRUE}
+#find the dimensions of the datasets
+dim(titanicDataTrain); dim(titanicDataTest)
+```
+
+```{r echo=TRUE}
+#Check for NA values and looking at summary
+anyNA(titanicData$fare)
+anyNA(titanicData$age)
+anyNA(titanicData$survived)
+summary(titanicData)
+```
+
+ Use the tuneGrid option on train to look at all neighbor
+values from 2 to 30.
+
+```{r echo=TRUE}
+#Set parameters with traincontrol() to repeated cross-validation, with 10 resampling iterations and 3 repeats. Then train the model to predict suvival from age and fare with the knn method.   
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+set.seed(1)
+knn_fit <- train(survived ~ age + fare, data = titanicDataTrain, method = "knn",
+ trControl=trctrl,
+ preProcess = c("center", "scale"),
+ tuneGrid = data.frame(k= 2:30),
+ tuneLength = 10)
+knn_fit
+```
+
+```{r echo=TRUE}
+#predict the test set using the fitted model
+test_pred <- predict(knn_fit, newdata = titanicDataTest)
+test_pred
+```
+
+```{r echo=TRUE}
+#Look at statistics of results and model accuracy.
+confusionMatrix(test_pred, titanicDataTest$survived)
+```
+

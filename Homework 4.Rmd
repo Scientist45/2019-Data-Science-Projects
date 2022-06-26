@@ -1,0 +1,30 @@
+---
+title: "Homework 4"
+author: "Kelly Craig"
+date: "May 28, 2019"
+output: html_document
+---
+
+```{r echo=FALSE, include =FALSE, results = 'hide'}
+library(knitr)
+library(readr)
+library(ggplot2)
+titanic <- read_csv("titanic.csv")
+```
+
+#Number 1
+I don't understand how to check if there is only one column in the if/then function. 
+```{r echo=TRUE}
+IQR <- function(vector, ...){
+x <- quantile(vector)
+invisible(vector)
+if(!is.tibble(vector) | ncol(vector)>1 | !is.numeric(vector)){
+stop("I want a vector only!")
+return(x)
+}}
+
+data <- runif(5)
+y <- IQR(data)
+y
+```
+

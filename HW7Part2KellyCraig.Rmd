@@ -1,0 +1,113 @@
+---
+title: "Homework7Part2KellyCraig"
+author: "Kelly Craig"
+date: "June 9, 2019"
+output:
+  html_document:
+    toc: yes
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, eval = TRUE, message = FALSE)
+library(tidyverse)
+library(knitr)
+library(DT)
+library(ggplot2)
+library(summarytools)
+```
+
+#Iris Data Set
+##Introduction
+The **Iris flower data set** or **Fisher’s Iris data set** is a multivariate data set introduced by the British statistician and biologist Ronald Fisher in his 1936 paper *The use of multiple measurements in taxonomic problems* as an [example of linear discriminant analysis](https://en.wikipedia.org/wiki/Linear_discriminant_analysis).
+
+```{r echo = FALSE, out.width = "200px"}
+include_graphics("../fisher.jpg")
+```  
+
+```{r echo = FALSE}
+setosa1 <- filter(iris, Species == "setosa")
+setosa1 <- setosa1[1:6,1:5]
+knitr::kable(setosa1, caption= "Preview of Iris Data")
+```
+
+##Numeric Summaries by Species
+A mathmatical summary for each species looking at sepal length, sepal width, petal length, and petal width. 
+
+```{r echo=FALSE, include =FALSE, results = 'hide'}
+#Filter by species, select columns, then use the function summary and cbind so it is formatted appropriately.Round the values to 1 decimal. Print the table. 
+summarytable <- function(input, ...){
+setosa <- filter(iris, Species == input)
+setosa <- select(setosa, Sepal.Length, Sepal.Width, Petal.Length, Petal.Width)
+setosa <- do.call(cbind, lapply(setosa, summary))
+setosa[,'Sepal.Length']=round(setosa[,'Sepal.Length'],1)
+setosa[,'Sepal.Width']=round(setosa[,'Sepal.Width'],1)
+setosa[,'Petal.Length']=round(setosa[,'Petal.Length'],1)
+setosa[,'Petal.Width']=round(setosa[,'Petal.Width'],1)
+x <- paste ("Summaries of Species", input)
+table <- knitr::kable(setosa, caption= x)
+return(table)
+}
+```
+
+```{r echo = FALSE}
+setosa <- summarytable("setosa")
+setosa
+
+versicolor <- summarytable("versicolor")
+versicolor
+
+virginica <- summarytable("virginica")
+virginica
+
+```
+
+##Visuals
+###Boxplot for Comparison
+The first boxplot is speal length vs species. The second box plot is sepal width vs species.
+
+```{r echo = FALSE}
+p <- ggplot(iris, aes(x=Species, y=Sepal.Length)) + 
+  geom_boxplot()
+p <- p + geom_jitter(aes(color = Species))
+print(p + ggtitle("Boxplot of Sepal Length"))
+
+
+P2 <- ggplot(iris, aes(x=Species, y=Sepal.Width)) + 
+  geom_boxplot()
+p2 <- P2 + geom_jitter(aes(color = Species))
+print(p2 + ggtitle("Boxplot for Sepal Width"))
+```
+
+###Multiple Distributions Present
+Histogram of the sepal lengths.The second plot is sepal lengths for the three species. 
+
+```{r echo = FALSE}
+ggplot(iris, aes(x=Sepal.Length)) + 
+    geom_histogram(aes(y=..density..), binwidth=.25) +
+    geom_density(size= 3, adjust= 0.4, color="red") +
+  ggtitle("Histogram for Sepal Length")
+```
+
+```{r echo = FALSE}
+ggplot(iris, aes(x=Sepal.Length)) + 
+  geom_histogram(aes(y=..density..), binwidth=.2) + 
+  geom_density(size= 2, color="red") +
+  facet_wrap(~ Species,ncol=3) +
+  ggtitle("Histogram for Sepal Length")
+```
+
+###Scatterplot
+Scatterplot of the sepal length vs sepal width and the second plot is sepal length vs petal width. The species are plotted with different colors. 
+
+```{r echo = FALSE}
+ggplot(iris, aes(x=Sepal.Length, y=Sepal.Width, color=Species)) + 
+  geom_point()+
+  geom_smooth(aes(group= Species), method=lm, color="green") +
+  ggtitle("Sepal Length vs Sepal Width")
+
+ggplot(iris, aes(x=Petal.Length, y=Petal.Width, color=Species)) + 
+  geom_point()+
+  geom_smooth(aes(group= Species), method=lm, color="green") +
+  ggtitle("Sepal Length vs Petal Width")
+```
+```
+

@@ -1,0 +1,75 @@
+---
+title: "Homework 2"
+author: "Kelly Craig"
+date: "May 23, 2019"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '1'
+  html_document:
+    collapsed: yes
+    toc: yes
+    toc_depth: '1'
+    toc_float: yes
+---
+
+# Lena
+
+``` {r Lena, out.width = "400px", echo = FALSE}
+knitr::include_graphics("o1z7p.jpg")
+```
+
+##Info {.tabset}
+###Image Information
+
+This is a *famous image* used in **image processing**. Her name is Lena. For more details, check [this website.](https://lemire.me/blog/2017/11/10/should-computer-scientists-keep-the-lena-picture/)
+
+###References
+
+The wikipedia article about Lena also references the following:
+
+* Carole Hersee  
+* Lorem ipsum  
+    + filler text  
+    + useful for templates  
+* Shirley cards  
+* Suzanne  
+* Utah teapot  
+* China Girl  
+
+# Chicago
+
+## Averages
+
+The `Chicago` data set includes information about weather and death in Chicago. Here are the means for the *temperature* and *death* variables using the `mean()` and `round()` functions.
+
+```{r echo=FALSE, include =FALSE, results = 'hide'}
+library(knitr)
+library(readr)
+library(ggplot2)
+Chicago <- read_csv("Chicago.csv")
+```
+
+```{r echo=FALSE}
+avgTemp <- mean(Chicago$temp)
+avgTemp <- round(avgTemp)
+#View(avgTemp)
+avgDeath <- mean(Chicago$death)
+avgDeath <- round(avgDeath, digits=2)
+#View(avgDeath)
+table <- data.frame("avgTemp" = avgTemp, "avgDeath" = avgDeath)
+knitr::kable(table)
+```
+
+## Plot Across Years
+
+The code given here will produce plots of temperature for different years. Note: this uses the `ggplot2` package - part of the  `tidyverse`.
+
+``` {r, echo = TRUE}
+ggplot(Chicago, aes(x = date, y = temp)) + 
+  geom_point() + 
+  facet_wrap(~year, ncol = 2, scales="free")
+```
+
+The plot covers years from 1997 to 2000.
+

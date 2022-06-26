@@ -1,0 +1,98 @@
+---
+title: "Homework8 Kelly Craig"
+author: "Kelly Craig"
+date: "June 15, 2019"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r echo=FALSE, include =FALSE, results = 'hide'}
+library(tidyverse)
+library(plotrix)
+library(parallel)
+library(tidyverse)
+library(knitr)
+Con <- read_csv("C:/Users/Kelly/Documents/concentration.csv")
+Con1 <- Con %>% filter(variety == "M.giganteus" | variety == "S.ravennae")
+#Con1 <- tbl_df(Con1)
+```
+
+Number 1 for loop
+
+```{r echo=TRUE}
+#Made a for loop for 1 to 5000. Sampled the concentration data set that has 42 rows and replaced the values. Used the lm function with concentration as the predictor and Total_lignin as the response . Then the coefficients are extracted using the function coef. Found the max.  
+for (i in 1:5000){
+DataSample <-sample_n(Con1, 42, replace=TRUE) 
+Model1 <- coef(lm(Total_lignin~concentration +I(concentration^2),data=DataSample))
+}
+MaxData <- -Model1[[2]]/(2*Model1[[3]])
+stderror <- std.error(Model1)
+print(c(MaxData,stderror))
+```
+
+Number 2 Replicate new editing
+
+```{r echo=TRUE}
+#Take the code from number one and write it into a function called bootFun. 
+bootFun <- function(concentration, Total_lignin, Con1){
+Index2 <- sample_n(Con1, 42, replace=TRUE)
+Model2 <- lm(Total_lignin~concentration +I(concentration^2),data=Index2)
+Model2 <- coef(Model2)
+Max2 <- -Model2[[2]]/(2*Model2[[3]])
+return(Max2)
+}
+
+#Replicate 5000 times using the replicate function and the bootFun function. 
+
+result <- replicate(5000, bootFun('concentration','Total_lignin', Con1))
+sterror2 <- std.error(result)
+print(c(sterror2, MaxData))
+
+```
+
+Number 3 Wrapper
+
+```{r echo=TRUE}
+#Create the seBootFun wrapper function to replicate.
+seBootFun <-function(data,resp,pred,B) {
+result <- replicate(B, bootFun(resp, pred, data))
+return(sd(result))
+}
+sd <- seBootFun(Con1, 'Glucose', 'concentration', 5000) 
+sd
+```
+
+
+Number 4 Parallel
+
+```{r echo=TRUE}
+
+#cores <- detectCores()
+#Cluster <- makeCluster(2)
+
+#clusterExport(cluster, list('seBootFun', 'bootFun', 'Con1'))
+#result <- parLapply(cluster, X = c("Total_lignin", "Glucose", "Xylose", "Arabinose"), fun = seBootFun, pred = 'concentration', B = 50, data = Con1)
+
+#result
+
+
+Lignin <- replicate(5, bootFun('concentration','Total_lignin', Con1))
+max.Li <- -Lignin[[2]]/(2*Lignin[[3]])
+sd.Li <- std.error(Lignin) 
+
+Glucose <- replicate(5, bootFun('concentration','Glucose', Con1))
+max.Li <- -Glucose[[2]]/(2*Glucose[[3]]) 
+sd.Li <- std.error(Glucose) 
+
+Xylose <- replicate(5, bootFun('concentration','Xylose', Con1))
+max.Li <- -Xylose[[2]]/(2*Xylose[[3]]) 
+sd.Li <- std.error(Xylose) 
+
+Arabinose <- replicate(5, bootFun('concentration','Arabinose', Con1))
+max.Li <- -Arabinose[[2]]/(2*Arabinose[[3]])
+sd.Li <- std.error(Arabinose)
+
+List <- c("Lignin" = Lignin, "Glucose" = Glucose, "Xylose" = Xylose, "Arabinose" = Arabinose)
+List
+```

@@ -1,0 +1,65 @@
+---
+title: "Homework10KellyCraig"
+author: "Kelly Craig"
+date: "June 22, 2019"
+output:
+  pdf_document: default
+  html_document: default
+---
+#a.
+Read this data in and provide a contingency table of pain and treatment.
+
+```{r echo=FALSE, include =FALSE, results = 'hide'}
+library(tidyverse)
+library(ggiraphExtra)
+data <- read_csv("C:/Users/Kelly/Documents/neuralgia.csv")
+```
+
+```{r echo = TRUE}
+table <- table(data$Treatment, data$Pain)
+table
+```
+
+#b.
+Fit a logistic regression model with age, treatment, and their interaction and provide the summary of
+the model fit.
+
+```{r echo = TRUE}
+#Change pain "no" and "yes" to 0 and 1. 
+data$Pain <- as.numeric(ifelse(data$Pain == 'No', 0,1))
+fit <- glm(Pain ~ Treatment + Age + Treatment*Age, data=data, family = "binomial")
+summary(fit)
+```
+
+#c.
+Provide a plot of the model fit (hint there is a nice pacakge for this we looked at).
+
+```{r echo = TRUE}
+ggiraphExtra::ggPredict(fit)
+```
+
+#d.
+What are you conclusions (no need to do a test) about the placebo vs the drugs based on your model
+and the contingency table?
+
+**Looking at the graph:** People under 70 more often reported that the drugs did not work. People over 70 more often reported that the drugs did work. People who had placebos tended to report that the drug did work. 
+
+**Looking at the contigency table:** overall all age groups reported that the drug did not work. All age groups tended to reported that the placebo worked. 
+
+#e.
+Use the model to provide estimated pain probabilities for an age of 70 and a treatment of "A", and an
+age of 70 treatment of "B"
+
+```{r echo = TRUE}
+predict(fit, newdata = data.frame(Age = c(70, 70), Treatment = c("A", "B")), type = "response", se.fit = TRUE)
+```
+
+#f
+Use the model to provide estimated odds of pain for someone that has an age of 70 and a treatment of
+"A".
+
+```{r echo = TRUE}
+x <- predict(fit, newdata = data.frame(Age = 70, Treatment ="A"), type = "link", se.fit = TRUE)
+exp(x$fit)
+```
+

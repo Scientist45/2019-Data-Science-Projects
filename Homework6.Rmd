@@ -1,0 +1,83 @@
+---
+title: "Homework 6"
+author: "Kelly Craig"
+date: "June 2, 2019"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r echo=FALSE, include =FALSE, results = 'hide'}
+devtools::install_github("r-dbi/bigrquery")
+library(devtools)
+library(bigrquery)
+library(DBI)
+library(dplyr)
+library(webshot)
+con <- dbConnect(bigrquery::bigquery(), project = "publicdata", dataset = "samples", billing = "my-project-st-242600")
+dbListTables(con)
+```
+
+#Number 1 - dplyr examples
+```{r Number 1 dplyr, echo=TRUE}
+#Example 1: Use the gsod dataset. Select for station number, year, month, and mean temp. Then group by month and how the top 10 rows.
+gsod <- tbl(con, "gsod")
+gsod %>% select(station_number, year, month, mean_temp) %>% group_by(month) %>% head(10)
+gsod
+
+#Example 2: Use the shakespeare dataset. Arrange the data by word count in descending order and how the top 10 rows. 
+shakespeare <- tbl(con, "shakespeare")
+shakespeare1 <- arrange(shakespeare, desc(word_count)) %>% head(10)
+shakespeare1
+```
+
+#Number 1 - dbGetQuery examples
+```{r Number 1 dbGetQuery, echo=TRUE}
+#Example 1: Use the shakespeare dataset and select word, word count, corpus columns. Print 10 rows.
+shake <- "SELECT word, word_count, corpus FROM `publicdata.samples.shakespeare`"
+dbGetQuery(con, shake, n = 10)
+
+#Example 2: Use the publicdata dataset and select title, id, and timestamp. Print 10 rows. 
+wikipedia <- "SELECT title, id, timestamp FROM `publicdata.samples.wikipedia`"
+dbGetQuery(con, wikipedia, n=10)
+```
+
+#Number 2
+```{r echo=FALSE, include =FALSE, results = 'hide'}
+library(devtools)
+#install_github("lchiffon/wordcloud2") #installed previously
+library(wordcloud2) 
+library(tidyverse)
+library(tidytext)
+library(stringr)
+library(wordcloud2)
+library(httpuv)
+library(rtweet)
+```
+
+```{r Number 2, echo=TRUE}
+#Search 200 non-retweeted tweets with the hashtag happy 
+Happy <- search_tweets2("#Happy", n = 200, include_rts = FALSE)
+head(Happy)
+dim(Happy)
+
+#Unnest the words using Tidy Text.
+HappyTable <- Happy %>% unnest_tokens(word, text)
+
+#Remove very common words such as "the", "of"
+data(stop_words)
+HappyTable <- HappyTable %>% anti_join(stop_words)
+
+#do a word count
+HappyTable <- HappyTable %>% count(word, sort = TRUE)
+HappyTable
+
+#filter out words you don't want to include in the word cloud. 
+HappyTable <-HappyTable %>% 
+  filter(!word %in% c('t.co', 'https', 'is', 'es', 'watch', '???', "it's", 'el', 'en', 'the','je', 'ep', 'week', 'amp'))
+HappyTable
+#Make a word cloud using the color option random-light with a black background. 
+wordcloud2(HappyTable, color = "random-light", backgroundColor = "black")
+```
+
+

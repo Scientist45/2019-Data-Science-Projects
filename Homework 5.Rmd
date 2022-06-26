@@ -1,0 +1,118 @@
+---
+title: "Homework 5"
+author: "Kelly Craig"
+date: "May 30, 2019"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r echo=FALSE, include =FALSE, results = 'hide'}
+library(tidyverse)
+library(dplyr)
+library(haven)
+library(readxl)
+```
+#Number 1
+A delimiter is a sequence of one or more characters used to specify the boundary between separate regions in data. The most common delimiter is the comma character.  
+
+#Number 2
+Both `library()` `and require()` are used to attach and load add-on packages which are already installed. `require()` is used inside functions and will output a warning and continue if the package is not found. `library()` will output an error. 
+
+#Number 3
+`read_csv()` and `read.csv()` both read in comma separated value files. The Base R function is `read.csv()` and the tidyverse fuction is `read_csv()`. `read.csv()` reads the character variables as factors and it is slower compared to `read_csv()`.  
+
+#Number 4a
+Read in the BreastCancer dat file and name it cancerData.
+```{r, echo=TRUE}
+cancerData <- read_tsv("C:/Users/Kelly/Documents/BreastCancer.dat")
+cancerData <- tbl_df(cancerData)
+cancerData
+```
+
+#Number 4b
+Select for only the size column in the cancerData data. 
+```{r, echo=TRUE}
+cancerDataSize <- cancerData %>% select("size")
+cancerDataSize
+```
+
+#Number 4c
+Print just the top 3 rows from the cancerData data. 
+```{r, echo=TRUE}
+cancerDataRow <- cancerData[1:3, ]
+cancerDataRow
+```
+
+#Number 4d
+select for just the size and meno columns in the cancerData data. Group by meno, then summarize, the mean, standard deviation, and IQR for the size values.
+```{r, echo=TRUE}
+cancerData <- cancerData %>% select("size", "meno")
+cancerData %>% group_by(meno) %>% summarise(mean(size), sd(size), IQR(size))
+```
+
+#Number 5a
+Read in the text file mosquito
+```{r, echo=TRUE}
+mosquitoData <- read_delim("C:/Users/Kelly/Documents/mosquito.txt", delim = "&")
+ tbl_df(mosquitoData)
+```
+
+#Number 5b
+Find the column names of mosquitoData. Read in mosquitoData2 using read_tsv and name them the same column names of mosquitoData. 
+
+```{r, echo=TRUE}
+names(mosquitoData)
+mosquitoData2 <- read_tsv("C:/Users/Kelly/Documents/mosquito2.txt", col_names = c("Day","Cage","trt","Response"))
+tbl_df(mosquitoData2)
+
+```
+
+# 5c
+Combine mosquitoData and mosquitoData2 using rbind.
+```{r, echo=TRUE}
+mosquitoFullData <- rbind(mosquitoData, mosquitoData2)
+tbl_df(mosquitoFullData)
+```
+
+#5d
+The rbind function can take a sequence of a vector, matrix or data-frame arguments and combine by columns or rows. It does not only work on dataframes.  
+
+#5e
+Create a column called LifeTime in hours and a column called Duration which is a category of Short, Long, or Medium. Append both columns onto the existing mosquito dataset.
+```{r, echo=TRUE}
+mm <- mosquitoFullData %>% mutate(LifeTime = (Response*24))
+mm$Duration <- ifelse(mm$Day < 20, 'Short', ifelse(mm$Day > 40, 'Long', 'Medium'))
+mosquitoFullData <- mm
+mm
+```
+
+#5f
+Write the mosquito data file to a csv file.
+
+```{r, echo=TRUE}
+write_csv(mosquitoFullData, "C:/Users/Kelly/Documents/mosquitoFullData.csv")
+```
+
+#6a
+Use the haven package to read in the Stata data.
+```{r, echo=TRUE}
+Effort <- read_stata("C:/Users/Kelly/Documents/effort.dta")
+Effort
+```
+
+#6b
+Create a subset showing effort values above 10.
+```{r, echo=TRUE}
+Effort <- subset(Effort, effort > 10)
+Effort
+```
+
+#7
+Read in the second tab on the excel file Chickens and rename it to sheepData.
+```{r, echo=TRUE}
+sheepData <- read_excel("C:/Users/Kelly/Documents/Chickens.xlsx", sheet = "Sheep")
+sheepData
+```
+
+

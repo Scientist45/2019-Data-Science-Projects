@@ -1,0 +1,111 @@
+---
+title: "Homework 12"
+author: "Kelly Craig"
+date: "June 27, 2019"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r echo=FALSE, include =FALSE, results = 'hide'}
+library(tidyverse)
+library(caret)
+library(rpart)
+library(rpart.plot)
+library(gbm)
+```
+
+```{r echo=FALSE, include=FALSE}
+#read in the csv file and change the class column to a factor
+data <- read_csv("C:/Users/Kelly/Documents/dataset_37_diabetes.csv")
+data$class <- as.factor(data$class)
+```
+
+```{r include=TRUE}
+#Split the dataset into the training data and the testing data.
+set.seed(1)
+train <- sample(1:nrow(data), size = nrow(data)*0.8)
+test <- dplyr::setdiff(1:nrow(data), train)
+dataTrain <- data[train, ]
+dataTest <- data[test, ]
+dataTrain <- as.data.frame(dataTrain)
+dataTest <- as.data.frame(dataTest)
+str(dataTrain)
+```
+
+
+#Number 1: Classification Tree
+
+```{r include=TRUE}
+#A classification tree using rpart.
+trctrl <- trainControl(method = "cv", number = 10)
+set.seed(12)
+dtm1 <- train(class~., data = dataTrain, method = "rpart",
+trControl=trctrl,
+preProcess = c("center", "scale"))
+p1 <- predict(dtm1, dataTest)
+str(p1)
+table(p1, dataTest$class)
+#Evaluate the models' performance on the test set using the misclassification rate.
+cfm <- confusionMatrix(p1, dataTest$class)
+cfm
+1-sum(diag(cfm$table))/sum(cfm$table)
+```
+
+
+#Number 2: Bagged Tree
+
+```{r include=TRUE}
+#fit a bagged tree using the treebag method.
+trctrl2 <- trainControl(method = "cv", number = 10)
+set.seed(12)
+dtm2 <- train(class~., data= dataTrain, method = "treebag",
+trControl = trctrl2,
+preProc = c("center", "scale"))
+p2 <- predict(dtm2, dataTest)
+str(p2)
+table(p2, dataTest$class)
+#Evaluate the models' performance on the test set using the misclassification rate.
+cfm2 <- confusionMatrix(p2, dataTest$class)
+cfm2
+1-sum(diag(cfm2$table))/sum(cfm2$table)
+```
+
+
+#Number 3: Random Forest
+
+```{r include=TRUE}
+#A random forest classification tree using the rf method.
+trctrl3 <- trainControl(method = "repeatedcv", number = 10, repeats=3)
+set.seed(12)
+dtm3 <- train(class~., data = dataTrain, method = "rf",
+trControl=trctrl3,
+preProcess = c("center", "scale"))
+p3 <- predict(dtm3, dataTest)
+str(p3)
+table(p3, dataTest$class)
+#Evaluate the models' performance on the test set using the misclassification rate.
+cfm3 <- confusionMatrix(p3, dataTest$class)
+cfm3
+1-sum(diag(cfm3$table))/sum(cfm3$table)
+```
+
+
+#Number 4: Boosted Tree
+
+```{r include=TRUE}
+#Fit a boosted tree using the gbm method.
+trctrl4 <- trainControl(method = "cv", number = 10)
+set.seed(12)
+dtm4 <- train(class~., data = dataTrain, method = "gbm",
+trControl=trctrl4,
+preProcess = c("center", "scale"),
+verbose = FALSE)
+p4 <- predict(dtm4, dataTest)
+str(p4)
+table(p4, dataTest$class)
+#Evaluate the models' performance on the test set using the misclassification rate.
+cfm4 <- confusionMatrix(p4, dataTest$class)
+cfm4
+1-sum(diag(cfm4$table))/sum(cfm4$table)
+```

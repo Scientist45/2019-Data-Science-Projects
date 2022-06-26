@@ -1,0 +1,79 @@
+---
+title: "Homework 3"
+author: "Kelly Craig"
+date: "May 27, 2019"
+output:
+  pdf_document: default
+  html_document: default
+---
+#Load Packages
+
+```{r echo=FALSE, include =FALSE, results = 'hide'}
+library(tidyverse)
+library(Lahman)
+```
+
+#Number 1
+Turn data into tibble then print
+
+```{r Number 1, echo=TRUE}
+Pitching <- tbl_df(Pitching)
+Pitching
+```
+
+#Number 2
+Name the new tibble PitchingID. Select for columns that end in ID and W,L, ERA columns. Print PitchingID tibble.   
+
+```{r Number 2, echo=TRUE}
+PitchingID <- Pitching %>% select(ends_with("ID"), W, L, ERA)
+PitchingID
+```
+
+#Number 3
+Filter years 2010 to 2015 in the yearID column Using the previous dataset PitchingID.  
+
+```{r Number 3, echo=TRUE}
+PitchingIDYear <- PitchingID %>% filter(yearID>= 2010 & yearID <= 2015)
+PitchingIDYear
+```
+
+#Number 4
+Add a column to the data (PitchingIDYear) for win loss percentage. 
+ 
+```{r Number 4, echo=TRUE}
+PitchingIDYearWL <- PitchingIDYear %>% mutate(WLpercentage = ( W / (W + L)))
+PitchingIDYearWL
+```
+
+#Number 5
+Sort PitchingIDYearWL data set by the Win/Loss Percentage column in descending order and name the new data set PitchingIDYearWLSorted.
+
+```{r Number 5, echo=TRUE}
+PitchingIDYearWLSorted <- arrange(PitchingIDYearWL, desc(WLpercentage))
+PitchingIDYearWLSorted
+```
+
+#Number 6
+Group the PitchingIDYearWLSorted dataset by team ID and year. Filter year ID with rows from years 2010 to 2015. Find the average of ERA and remove NA values. 
+```{r Number 6, echo=TRUE}
+PitchingAvgERA <- PitchingIDYearWLSorted %>% group_by(teamID,yearID) %>% filter(yearID %in% (c(2010,2011,2012,2013,2014,2015))) %>% summarise(PitchingAvgERA=mean(ERA, na.rm=TRUE))
+PitchingAvgERA
+```
+
+#Number 7
+Turn the PitchingAvgERA dataset from long format into wide using the spread function. Column names are year and the value to spread out is average ERA 
+
+```{r Number 7, echo=TRUE}
+Wide <- PitchingAvgERA %>% spread(key = yearID , value = PitchingAvgERA)
+knitr::kable(Wide)
+```
+
+#Number 8
+
+```{r Number 8, echo=TRUE}
+Wide <- Wide %>% replace_na(list("2010" = 7.198065, "2011" = 4.736818))
+Wide <- Wide[-c(11),]
+
+knitr::kable(Wide)
+```
+
